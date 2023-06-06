@@ -5,6 +5,11 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
+      selected-environment:
+        type: environment
+        description: Deploy environment
+        required: true
+        
       skip-needs-checks:
         description: Force deployment to selected invironments without checking pre-requisite needs
         type: boolean
@@ -39,9 +44,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+    
+      - name: Where am i?
+        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
 
   deploy-dev:
-    if: ${{ inputs.deploy-dev || inputs.skip-needs-checks }} 
+    #if: ${{ github.event.inputs.environment }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -50,40 +58,40 @@ jobs:
       name: 'Development'
     steps:
       - name: Where am i?
-        run: echo ${GITHUB_ENV}
+        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
   
   deploy-test:
-    if: ${{ inputs.deploy-test || inputs.skip-needs-checks }} 
+    #if: ${{ inputs.deploy-test || inputs.skip-needs-checks }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
-    needs: deploy-dev
+    needs: [deploy-dev]
     environment:
       name: 'Test'
     steps:
       - name: Where am i?
-        run: echo ${GITHUB_ENV}
+        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
         
   deploy-preprod:
-    if: ${{ inputs.deploy-preprod || inputs.skip-needs-checks }} 
+    #if: ${{ inputs.deploy-preprod || inputs.skip-needs-checks }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
-    needs: deploy-test
+    needs: [deploy-dev, deploy-test]
     environment:
-      name: 'preprod'
+      name: 'Preprod'
     steps:
       - name: Where am i?
-        run: echo ${GITHUB_ENV}
+        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
         
   deploy-prod:
-    if: ${{ inputs.deploy-prod || inputs.skip-needs-checks }} 
+    #if: ${{ inputs.deploy-prod || inputs.skip-needs-checks }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
-    needs: deploy-preprod
+    needs: [deploy-dev, deploy-preprod]
     environment:
       name: 'Prod'
     steps:
       - name: Where am i?
-        run: echo ${GITHUB_ENV}
+        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
