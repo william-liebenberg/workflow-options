@@ -55,7 +55,7 @@ jobs:
           echo PreProd: ${{inputs.deploy-preprod}}
           echo Prod: ${{inputs.deploy-prod}}
 
-          if[ ${{inputs.deploy-dev}} || ${{inputs.deploy-test}} || ${{inputs.deploy-preprod}} || ${{inputs.deploy-prod}}) ]; then
+          if[ ${{inputs.deploy-dev}} || ${{inputs.deploy-test}} || ${{inputs.deploy-preprod}} || ${{inputs.deploy-prod}} ]; then
             echo Yay! at least 1 environment selected to deploy!
             exit 0;
           else
