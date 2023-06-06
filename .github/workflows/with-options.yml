@@ -5,10 +5,7 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
-      #environment:
-      #  type: environment
-      #  description: Deploy environment
-      #  required: true
+      # single choice
       environment:
         type: choice
         description: Deploy environment
@@ -19,27 +16,30 @@ on:
         - preprod
         - prod
         
-        
       skip-needs-checks:
         description: Force deployment to selected invironments without checking pre-requisite needs
         type: boolean
         required: true
-        default: false      
+        default: false
+
       deploy-dev:
         description: Deploy Dev
         type: boolean
         required: true
         default: true
+
       deploy-test:
         description: Deploy Test
         type: boolean
         required: true
         default: true
+
       deploy-preprod:
         description: Deploy Pre-production
         type: boolean
         required: true
         default: true
+
       deploy-prod:
         description: Deploy Production
         type: boolean
@@ -59,7 +59,7 @@ jobs:
         run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
 
   deploy-dev:
-    #if: ${{ github.event.inputs.environment }} 
+    if: ${{ inputs.deploy-dev }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -71,7 +71,7 @@ jobs:
         run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
   
   deploy-test:
-    #if: ${{ inputs.deploy-test || inputs.skip-needs-checks }} 
+    if: ${{ inputs.deploy-test || (inputs.deploy-test && inputs.skip-needs-checks) }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -83,7 +83,7 @@ jobs:
         run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
         
   deploy-preprod:
-    #if: ${{ inputs.deploy-preprod || inputs.skip-needs-checks }} 
+    if: ${{ inputs.deploy-preprod || (inputs.deploy-preprod && inputs.skip-needs-checks) }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -95,7 +95,7 @@ jobs:
         run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
         
   deploy-prod:
-    #if: ${{ inputs.deploy-prod || inputs.skip-needs-checks }} 
+    if: ${{ inputs.deploy-prod || (inputs.deploy-prod && inputs.skip-needs-checks) }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
