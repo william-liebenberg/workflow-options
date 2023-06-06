@@ -35,7 +35,6 @@ permissions:
 jobs:
 
   build:
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -55,10 +54,7 @@ jobs:
           echo PreProd: ${{inputs.deploy-preprod}}
           echo Prod: ${{inputs.deploy-prod}}
 
-          if [[ ${{inputs.deploy-dev}} == "true" || ${{inputs.deploy-test}} == "true" || ${{inputs.deploy-preprod}} == "true" || ${{inputs.deploy-prod}} == "true" ]]; then
-            echo Yay! at least 1 environment selected to deploy!
-            exit 0;
-          else
+          if [[ ${{inputs.deploy-dev}} == "false" && ${{inputs.deploy-test}} == "false" && ${{inputs.deploy-preprod}} == "false" && ${{inputs.deploy-prod}} == "false" ]]; then
               echo Nah dude! Please select at least 1 environment to deploy!
               exit 1;
           fi
