@@ -5,13 +5,6 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
-
-      ignore-needs:
-        description: Ignore the job `needs`
-        type: boolean
-        required: true
-        default: false
-
       deploy-dev:
         description: Deploy Dev
         type: boolean
@@ -49,7 +42,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
 
   deploy-dev:
-    if: ${{ always() && needs.build.result == 'success' && inputs.deploy-dev }}
+    if: ${{ always() && needs.*.result == 'success' && inputs.deploy-dev }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -61,7 +54,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
   
   deploy-test:
-    if: ${{ always() && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped') && inputs.deploy-test }}
+    if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-test }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -73,7 +66,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
         
   deploy-preprod:
-    if: ${{ always() && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped') && inputs.deploy-preprod }}
+    if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-preprod }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -85,7 +78,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
         
   deploy-prod:
-    if: ${{ always() && (needs.deploy-preprod.result == 'success' || needs.deploy-preprod.result == 'skipped') && inputs.deploy-prod }}
+    if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-prod }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
