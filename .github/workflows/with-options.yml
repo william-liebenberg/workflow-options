@@ -5,16 +5,16 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
-      # single choice
-      environment:
-        type: choice
-        description: Deploy environment
-        required: true
-        options:
-        - dev
-        - test
-        - preprod
-        - prod
+      # # single choice
+      # environment:
+      #   type: choice
+      #   description: Deploy environment
+      #   required: true
+      #   options:
+      #   - dev
+      #   - test
+      #   - preprod
+      #   - prod
         
       skip-needs-checks:
         description: Force deployment to selected invironments without checking pre-requisite needs
@@ -56,10 +56,10 @@ jobs:
       - uses: actions/checkout@v3
     
       - name: Where am i?
-        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
+        run: echo "environment is ${{ github.env }}"
 
   deploy-dev:
-    if: ${{ inputs.deploy-dev }} 
+    if: ${{ inputs.deploy-dev }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -68,10 +68,10 @@ jobs:
       name: 'Development'
     steps:
       - name: Where am i?
-        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
+        run: echo "environment is ${{ github.env }}"
   
   deploy-test:
-    if: ${{ inputs.deploy-test || (inputs.deploy-test && inputs.skip-needs-checks) }} 
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-test || (inputs.deploy-test && inputs.skip-needs-checks)) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -80,10 +80,10 @@ jobs:
       name: 'Test'
     steps:
       - name: Where am i?
-        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
+        run: echo "environment is ${{ github.env }}"
         
   deploy-preprod:
-    if: ${{ inputs.deploy-preprod || (inputs.deploy-preprod && inputs.skip-needs-checks) }} 
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-preprod || (inputs.deploy-preprod && inputs.skip-needs-checks)) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -92,10 +92,10 @@ jobs:
       name: 'Preprod'
     steps:
       - name: Where am i?
-        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
+        run: echo "environment is ${{ github.env }}"
         
   deploy-prod:
-    if: ${{ inputs.deploy-prod || (inputs.deploy-prod && inputs.skip-needs-checks) }} 
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-prod || (inputs.deploy-prod && inputs.skip-needs-checks)) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -104,4 +104,4 @@ jobs:
       name: 'Prod'
     steps:
       - name: Where am i?
-        run: echo "environment is ${{ github.event.inputs.environment }} / ${{ inputs.environment }}"
+        run: echo "environment is ${{ github.env }}"
