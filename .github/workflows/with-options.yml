@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
-      selected-environment:
+      environment:
         type: environment
         description: Deploy environment
         required: true
