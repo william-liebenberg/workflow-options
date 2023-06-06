@@ -60,7 +60,7 @@ jobs:
           fi
 
   deploy-dev:
-    if: ${{ always() && needs.*.result == 'success' && inputs.deploy-dev }}
+    if: ${{ always() && needs.pre-deploy-check.result == 'success' && inputs.deploy-dev }}
     uses: ./.github/workflows/deploy-environment.yml
     needs: pre-deploy-check
     with:
@@ -70,7 +70,7 @@ jobs:
       contents: none
   
   deploy-test:
-    if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-test }}
+    if: ${{ always() && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped') && inputs.deploy-test }}
     uses: ./.github/workflows/deploy-environment.yml
     needs: deploy-dev
     with:
@@ -80,7 +80,7 @@ jobs:
       contents: none
         
   deploy-preprod:
-    if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-preprod }}
+    if: ${{ always() && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped') && inputs.deploy-preprod }}
     uses: ./.github/workflows/deploy-environment.yml
     needs: deploy-test
     with:
@@ -90,7 +90,7 @@ jobs:
       contents: none
         
   deploy-prod:
-    if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-prod }}
+    if: ${{ always() && (needs.deploy-preprod.result == 'success' || needs.deploy-preprod.result == 'skipped') && inputs.deploy-prod }}
     uses: ./.github/workflows/deploy-environment.yml
     needs: deploy-preprod
     with:
