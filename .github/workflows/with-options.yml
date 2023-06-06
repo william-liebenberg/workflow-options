@@ -10,7 +10,7 @@ on:
       #  description: Deploy environment
       #  required: true
       environment:
-        type: multi-choice
+        type: choice
         description: Deploy environment
         required: true
         options:
