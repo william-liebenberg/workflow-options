@@ -4,6 +4,27 @@ on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      deploy-dev:
+        description: Deploy Dev
+        type: boolean
+        required: true
+        default: true
+      deploy-test:
+        description: Deploy Test
+        type: boolean
+        required: true
+        default: true
+      deploy-preprod:
+        description: Deploy Pre-production
+        type: boolean
+        required: true
+        default: true
+      deploy-prod:
+        description: Deploy Production
+        type: boolean
+        required: true
+        default: true
 
 permissions:
   contents: read
@@ -11,18 +32,53 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
 
-  deploy:
+  deploy-dev:
+    if: ${{ inputs.deploy-dev }} 
     permissions:
       contents: none
     runs-on: ubuntu-latest
     needs: build
     environment:
       name: 'Development'
-
     steps:
-      - name: Lowercase the repo name and username
-        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+      - name: Where am i?
+        run: echo ${GITHUB_ENV}
+  
+  deploy-test:
+    if: ${{ inputs.deploy-test }} 
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    environment:
+      name: 'Test'
+    steps:
+      - name: Where am i?
+        run: echo ${GITHUB_ENV}
+        
+  deploy-preprod:
+    if: ${{ inputs.deploy-preprod }} 
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: deploy-test
+    environment:
+      name: 'preprod'
+    steps:
+      - name: Where am i?
+        run: echo ${GITHUB_ENV}
+        
+  deploy-prod:
+    if: ${{ inputs.deploy-prod }} 
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: deploy-preprod
+    environment:
+      name: 'Prod'
+    steps:
+      - name: Where am i?
+        run: echo ${GITHUB_ENV}
