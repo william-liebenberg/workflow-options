@@ -1,4 +1,4 @@
-name: Workflow with options
+name: Deploy Build to Selected Environment
 
 on:
   push:
@@ -33,58 +33,63 @@ permissions:
   contents: read
 
 jobs:
+  fail-check:
+    if: ${{ inputs.deploy-dev || inputs.deploy-test || inputs.deploy-preprod || inputs.deploy-prod }}
+    runs-on: ubuntu-latest
+    steps:
+        - name: List environments to deploy
+          run: |
+            echo Dev: ${{inputs.deploy-dev}}
+            echo Test: ${{inputs.deploy-test}}
+            echo PreProd: ${{inputs.deploy-preprod}}
+            echo Prod: ${{inputs.deploy-prod}}
+
   build:
+    needs: fail-check
+    if: needs.fail-check.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
     
-      - name: Where am i?
-        run: echo "environment is ${{ github.env }}"
+      - name: Build
+        run: echo "Building stuff... please wait"
 
   deploy-dev:
     if: ${{ always() && needs.*.result == 'success' && inputs.deploy-dev }}
+    uses: ./.github/workflows/deploy-environment.yml
+    needs: build
+    with:
+      environment: Dev
+    secrets: inherit
     permissions:
       contents: none
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Development'
-    steps:
-      - name: Where am i?
-        run: echo "environment is ${{ github.env }}"
   
   deploy-test:
     if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-test }}
+    uses: ./.github/workflows/deploy-environment.yml
+    needs: deploy-dev
+    with:
+      environment: Test
+    secrets: inherit
     permissions:
       contents: none
-    runs-on: ubuntu-latest
-    needs: [deploy-dev]
-    environment:
-      name: 'Test'
-    steps:
-      - name: Where am i?
-        run: echo "environment is ${{ github.env }}"
         
   deploy-preprod:
     if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-preprod }}
+    uses: ./.github/workflows/deploy-environment.yml
+    needs: deploy-test
+    with:
+      environment: Preprod
+    secrets: inherit
     permissions:
       contents: none
-    runs-on: ubuntu-latest
-    needs: [deploy-test]
-    environment:
-      name: 'Preprod'
-    steps:
-      - name: Where am i?
-        run: echo "environment is ${{ github.env }}"
         
   deploy-prod:
     if: ${{ always() && (needs.*.result == 'success' || needs.*.result == 'skipped') && inputs.deploy-prod }}
+    uses: ./.github/workflows/deploy-environment.yml
+    needs: deploy-preprod
+    with:
+      environment: Prod
+    secrets: inherit
     permissions:
       contents: none
-    runs-on: ubuntu-latest
-    needs: [ deploy-preprod]
-    environment:
-      name: 'Prod'
-    steps:
-      - name: Where am i?
-        run: echo "environment is ${{ github.env }}"

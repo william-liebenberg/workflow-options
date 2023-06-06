@@ -1,0 +1,17 @@
+name: deploy-environment
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        description: Name of deployment environment
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Where am i?
+        run: echo "environment is ${{ inputs.environment }}"
