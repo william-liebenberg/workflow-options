@@ -49,7 +49,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
 
   deploy-dev:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-dev && inputs.ignore-needs) }}
+    if: ${{ always() && (inputs.deploy-dev && (needs.build.result == 'success' || needs.build.result == 'skipped')) || (inputs.deploy-dev && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
   
   deploy-test:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-test && inputs.ignore-needs) }}
+    if: ${{ always() && (inputs.deploy-test && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped')) || (inputs.deploy-test && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -73,11 +73,11 @@ jobs:
         run: echo "environment is ${{ github.env }}"
         
   deploy-preprod:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-preprod && inputs.ignore-needs) }}
+    if: ${{ always() && (inputs.deploy-preprod && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped')) || (inputs.deploy-preprod && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
-    needs: [deploy-dev, deploy-test]
+    needs: [deploy-test]
     environment:
       name: 'Preprod'
     steps:
@@ -85,11 +85,11 @@ jobs:
         run: echo "environment is ${{ github.env }}"
         
   deploy-prod:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-prod && inputs.ignore-needs) }}
+    if: ${{ always() && (inputs.deploy-prod && (needs.deploy-preprod.result == 'success' || needs.deploy-preprod.result == 'skipped')) || (inputs.deploy-prod && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
-    needs: [deploy-dev, deploy-preprod]
+    needs: [ deploy-preprod]
     environment:
       name: 'Prod'
     steps:
