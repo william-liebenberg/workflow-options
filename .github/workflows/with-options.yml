@@ -5,19 +5,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
-      # # single choice
-      # environment:
-      #   type: choice
-      #   description: Deploy environment
-      #   required: true
-      #   options:
-      #   - dev
-      #   - test
-      #   - preprod
-      #   - prod
-        
-      skip-needs-checks:
-        description: Force deployment to selected invironments without checking pre-requisite needs
+
+      ignore-needs:
+        description: Ignore the job `needs`
         type: boolean
         required: true
         default: false
@@ -71,7 +61,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
   
   deploy-test:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-test || (inputs.deploy-test && inputs.skip-needs-checks)) }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-test || (inputs.deploy-test && inputs.ignore-needs)) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -83,7 +73,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
         
   deploy-preprod:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-preprod || (inputs.deploy-preprod && inputs.skip-needs-checks)) }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-preprod || (inputs.deploy-preprod && inputs.ignore-needs)) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -95,7 +85,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
         
   deploy-prod:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-prod || (inputs.deploy-prod && inputs.skip-needs-checks)) }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-prod || (inputs.deploy-prod && inputs.ignore-needs)) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
