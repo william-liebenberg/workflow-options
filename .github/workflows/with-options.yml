@@ -49,7 +49,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
 
   deploy-dev:
-    if: ${{ always() && (inputs.deploy-dev && (needs.build.result == 'success' || needs.build.result == 'skipped')) || (inputs.deploy-dev && inputs.ignore-needs) }}
+    if: ${{ always() && (inputs.deploy-dev && (needs.build.result == 'success')) || (inputs.deploy-dev && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
   
   deploy-test:
-    if: ${{ always() && (inputs.deploy-test && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped')) || (!inputs.deploy-dev && inputs.deploy-test && inputs.ignore-needs) }}
+    if: ${{ always() && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped') && (!inputs.deploy-dev && inputs.deploy-test && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
