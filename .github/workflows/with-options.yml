@@ -5,10 +5,20 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
+      #environment:
+      #  type: environment
+      #  description: Deploy environment
+      #  required: true
       environment:
-        type: environment
+        type: multi-choice
         description: Deploy environment
         required: true
+        options:
+        - dev
+        - test
+        - preprod
+        - prod
+        
         
       skip-needs-checks:
         description: Force deployment to selected invironments without checking pre-requisite needs
