@@ -33,20 +33,8 @@ permissions:
   contents: read
 
 jobs:
-  fail-check:
-    if: ${{ inputs.deploy-dev || inputs.deploy-test || inputs.deploy-preprod || inputs.deploy-prod }}
-    runs-on: ubuntu-latest
-    steps:
-        - name: List environments to deploy
-          run: |
-            echo Dev: ${{inputs.deploy-dev}}
-            echo Test: ${{inputs.deploy-test}}
-            echo PreProd: ${{inputs.deploy-preprod}}
-            echo Prod: ${{inputs.deploy-prod}}
 
   build:
-    needs: fail-check
-    if: needs.fail-check.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -54,10 +42,28 @@ jobs:
       - name: Build
         run: echo "Building stuff... please wait"
 
+  pre-deploy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List environments to deploy
+        run: |
+          echo Dev: ${{inputs.deploy-dev}}
+          echo Test: ${{inputs.deploy-test}}
+          echo PreProd: ${{inputs.deploy-preprod}}
+          echo Prod: ${{inputs.deploy-prod}}
+          
+          if[ ${{inputs.deploy-dev}} || ${{inputs.deploy-test}} || ${{inputs.deploy-preprod}} || ${{inputs.deploy-prod}}) ]; then
+            echo Yay! at least 1 environment selected to deploy!
+            exit 0;
+          else
+            echo Nah dude! Please select at least 1 environment to deploy!
+            exit 1;
+          fi
+
   deploy-dev:
     if: ${{ always() && needs.*.result == 'success' && inputs.deploy-dev }}
     uses: ./.github/workflows/deploy-environment.yml
-    needs: build
+    needs: pre-deploy-check
     with:
       environment: Dev
     secrets: inherit
