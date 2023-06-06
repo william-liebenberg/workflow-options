@@ -43,6 +43,8 @@ jobs:
         run: echo "Building stuff... please wait"
 
   pre-deploy-check:
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: List environments to deploy
@@ -51,7 +53,7 @@ jobs:
           echo Test: ${{inputs.deploy-test}}
           echo PreProd: ${{inputs.deploy-preprod}}
           echo Prod: ${{inputs.deploy-prod}}
-          
+
           if[ ${{inputs.deploy-dev}} || ${{inputs.deploy-test}} || ${{inputs.deploy-preprod}} || ${{inputs.deploy-prod}}) ]; then
             echo Yay! at least 1 environment selected to deploy!
             exit 0;
