@@ -49,7 +49,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
 
   deploy-dev:
-    if: ${{ inputs.deploy-dev }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-dev && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
   
   deploy-test:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-test || (inputs.deploy-test && inputs.ignore-needs)) }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-test && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
         
   deploy-preprod:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-preprod || (inputs.deploy-preprod && inputs.ignore-needs)) }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-preprod && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -85,7 +85,7 @@ jobs:
         run: echo "environment is ${{ github.env }}"
         
   deploy-prod:
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-prod || (inputs.deploy-prod && inputs.ignore-needs)) }}
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') && (inputs.deploy-prod && inputs.ignore-needs) }}
     permissions:
       contents: none
     runs-on: ubuntu-latest
